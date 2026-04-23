@@ -2,6 +2,19 @@
 
 Local-first **Markdown** and **PDF** reader for Windows (web + **Tauri** desktop). Import files into a private library, read and annotate PDFs, edit Markdown, and export when you need a file on disk.
 
+## Best for other PC
+
+- Run `Northstar_0.1.0_x64-setup.exe` (or `.msi`) from the release artifacts.
+- This is the one-step flow and handles prerequisites better than copying only an `.exe`.
+- Portable mode is supported, but keep the full folder (`md-readeder.exe` + `resources/`) together.
+
+### File locations
+
+- NSIS installer (`.exe`): `src-tauri/target/release/bundle/nsis/Northstar_0.1.0_x64-setup.exe`
+- MSI installer (`.msi`): `src-tauri/target/release/bundle/msi/Northstar_0.1.0_x64_en-US.msi`
+- Release app executable (`.exe`): `src-tauri/target/release/md-readeder.exe`
+- Portable executable copy (`.exe`): `output/portable/Northstar-Portable/md-readeder.exe`
+
 ## Quick links
 
 - **[Install and use](docs/INSTALL-AND-USE.md)** — Windows installers, portable folder, WebView2, troubleshooting  
