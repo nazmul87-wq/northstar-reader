@@ -1,0 +1,35 @@
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --font-display: 'Segoe UI Variable Display', 'Inter', 'Segoe UI', sans-serif;
+  --font-body: 'Segoe UI Variable Text', 'Inter', 'Segoe UI', sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', monospace;
+
+  --bg-canvas: #0f1116;
+  --surface-panel: #161a22;
+  --surface-soft: #1c2230;
+  --surface-soft-2: #212939;
+  --surface-selected: #23324e;
+  --border-base: #2c3548;
+  --border-muted: #252d3e;
+  --border-strong: #3a4966;
+
+  --text-strong: #e7edf7;
+  --text-body: #c9d4e4;
+  --text-muted: #93a2b8;
+  --text-faint: #74839a;
+
+  --accent-primary: #6ca8ff;
+  --accent-secondary: #7dcfff;
+  --focus-ring: rgba(108, 168, 255, 0.55);
+
+  --annotation-yellow: #ffd966;
+  --annotation-green: #7edfa2;
+  --annotation-blue: #7ab8ff;
+  --annotation-pink: #f5a0d8;
+  --annotation-orange: #ffba7a;
+}

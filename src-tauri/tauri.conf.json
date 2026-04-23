@@ -1,0 +1,37 @@
+{
+  "productName": "Northstar",
+  "identifier": "com.nazmu.northstar",
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "security": {},
+    "windows": [
+      {
+        "label": "main",
+        "title": "Northstar",
+        "width": 1280,
+        "height": 800,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "category": "Utility",
+    "icon": [
+      "icons/icon.ico"
+    ],
+    "shortDescription": "Local-first Markdown knowledge app",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper",
+        "silent": true
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+[package]
+name = "md-readeder"
+version = "0.1.0"
+description = "Tauri backend for a local-first Markdown knowledge app"
+authors = ["Codex"]
+license = "MIT"
+edition = "2021"
+
+[lib]
+name = "md_readeder_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+notify = "6"
+regex = "1"
+rusqlite = { version = "0.39", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+thiserror = "2"
+walkdir = "2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+  "Win32_Storage_FileSystem",
+  "Win32_Foundation",
+  "Win32_UI_WindowsAndMessaging",
+] }
