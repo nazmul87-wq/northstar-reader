@@ -21,6 +21,10 @@ Local-first **Markdown** and **PDF** reader for Windows (web + **Tauri** desktop
 - Release app executable (`.exe`): `src-tauri/target/release/md-readeder.exe`
 - Portable executable copy (`.exe`): `output/portable/Northstar-Portable/md-readeder.exe`
 
+## Screenshot
+
+![Northstar reader screenshot](screenshots/qa-pdf-fix.png)
+
 ## Quick links
 
 - **[Install and use](docs/INSTALL-AND-USE.md)** — Windows installers, portable folder, WebView2, troubleshooting  
