@@ -8,6 +8,12 @@ Local-first **Markdown** and **PDF** reader for Windows (web + **Tauri** desktop
 - This is the one-step flow and handles prerequisites better than copying only an `.exe`.
 - Portable mode is supported, but keep the full folder (`md-readeder.exe` + `resources/`) together.
 
+### Which option is best?
+
+1. **Best for most users:** NSIS setup `.exe` (`Northstar_0.1.0_x64-setup.exe`)
+2. **Best for IT/admin deployment:** MSI (`Northstar_0.1.0_x64_en-US.msi`)
+3. **Use only when needed:** Portable folder (`md-readeder.exe` + `resources/`)
+
 ### File locations
 
 - NSIS installer (`.exe`): `src-tauri/target/release/bundle/nsis/Northstar_0.1.0_x64-setup.exe`
