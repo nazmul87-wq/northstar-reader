@@ -218,6 +218,18 @@
   -webkit-user-select: none;
 }
 
+.reading-progress-label {
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
 .pdf-tools .btn-secondary:disabled {
   opacity: 0.42;
   cursor: not-allowed;
