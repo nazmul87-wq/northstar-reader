@@ -20,6 +20,9 @@ output/
 # Playwright CLI capture dumps
 .playwright-cli/
 
+# Superpowers brainstorming session state
+.superpowers/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
