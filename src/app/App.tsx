@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import {
   BookOpen,
   Download,
@@ -19,6 +19,7 @@ import rehypeHighlight from 'rehype-highlight'
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { bakePdfAnnotations, downloadBytes } from '../features/reader/pdf'
+import { formatMarkdownProgress, formatPdfProgress, getMarkdownProgressPercent } from '../features/reader/progress'
 import {
   deleteLibraryFile,
   loadActiveFileId,
@@ -40,9 +41,11 @@ function App() {
   const [library, setLibrary] = useState<ReaderFile[]>([])
   const [activeFileId, setActiveFileId] = useState<string | null>(null)
   const [pdfDoc, setPdfDoc] = useState<PdfDocumentLike | null>(null)
+  const [pdfDocFileId, setPdfDocFileId] = useState<string | null>(null)
   const [pdfPage, setPdfPage] = useState(1)
   const [pdfScale, setPdfScale] = useState(1.2)
   const [pdfMode, setPdfMode] = useState<'single' | 'continuous'>('continuous')
+  const [markdownProgress, setMarkdownProgress] = useState(100)
   const [markdownDrafts, setMarkdownDrafts] = useState<Record<string, string>>({})
   const [pdfTool, setPdfTool] = useState<'highlight' | 'comment'>('highlight')
   const [pdfColor, setPdfColor] = useState<string>(ANNOTATION_COLORS[0])
@@ -69,6 +72,7 @@ function App() {
     () => library.find((item) => item.id === activeFileId) ?? null,
     [library, activeFileId],
   )
+  const activePdfDoc = activeFile?.kind === 'pdf' && pdfDocFileId === activeFile.id ? pdfDoc : null
   const activeFileKind = activeFile?.kind ?? null
   const effectiveSelectedAnnotationId = useMemo(() => {
     if (activeFile?.kind !== 'pdf') {
@@ -98,6 +102,33 @@ function App() {
     ? annotationDrafts[selectedAnnotation.id] ?? selectedAnnotation.comment
     : ''
 
+  const updateMarkdownProgress = useCallback(() => {
+    const viewer = viewerSurfaceRef.current
+    setMarkdownProgress(
+      getMarkdownProgressPercent(
+        viewer
+          ? {
+              scrollTop: viewer.scrollTop,
+              scrollHeight: viewer.scrollHeight,
+              clientHeight: viewer.clientHeight,
+            }
+          : null,
+      ),
+    )
+  }, [])
+
+  const readingProgressLabel = useMemo(() => {
+    if (activeFile?.kind === 'pdf') {
+      return formatPdfProgress(pdfPage, activePdfDoc?.numPages ?? 0)
+    }
+
+    if (activeFile?.kind === 'markdown') {
+      return formatMarkdownProgress(markdownProgress)
+    }
+
+    return null
+  }, [activeFile?.kind, activePdfDoc?.numPages, markdownProgress, pdfPage])
+
   useEffect(() => {
     void (async () => {
       try {
@@ -116,13 +147,24 @@ function App() {
     if (!activeFile || activeFile.kind !== 'pdf' || !activeFile.pdfBytes) {
       return
     }
+
+    let isCurrent = true
     const pdfBytes = activeFile.pdfBytes
+    const fileId = activeFile.id
+
     void (async () => {
       // Pass a copy to pdf.js so app state bytes are not detached.
       const task = getDocument({ data: pdfBytes.slice() })
       const loaded = (await task.promise) as unknown as PdfDocumentLike
-      setPdfDoc(loaded)
+      if (isCurrent) {
+        setPdfDoc(loaded)
+        setPdfDocFileId(fileId)
+      }
     })()
+
+    return () => {
+      isCurrent = false
+    }
   }, [activeFile])
 
   useEffect(() => {
@@ -165,6 +207,15 @@ function App() {
   }, [activeFileId])
 
   useEffect(() => {
+    if (activeFile?.kind !== 'markdown') {
+      return
+    }
+
+    const frame = requestAnimationFrame(updateMarkdownProgress)
+    return () => cancelAnimationFrame(frame)
+  }, [activeFile, updateMarkdownProgress])
+
+  useEffect(() => {
     const syncReaderFullscreen = () => {
       const el = readerMiddleRef.current
       const doc = document as Document & { webkitFullscreenElement?: Element | null }
@@ -179,11 +230,11 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!pdfDoc || activeFileKind !== 'pdf') {
+    if (!activePdfDoc || activeFileKind !== 'pdf') {
       return
     }
     if (pdfMode === 'single') {
-      void renderPdfPage(pdfDoc, pdfPage, pdfScale, singleCanvasRef.current)
+      void renderPdfPage(activePdfDoc, pdfPage, pdfScale, singleCanvasRef.current)
       return
     }
 
@@ -192,7 +243,7 @@ function App() {
       lastContinuousScrollRef.current = viewer.scrollTop
     }
     void renderContinuous(
-      pdfDoc,
+      activePdfDoc,
       pdfScale,
       continuousContainerRef.current,
       activeContinuousAnnotations,
@@ -204,7 +255,7 @@ function App() {
       }
     })
   }, [
-    pdfDoc,
+    activePdfDoc,
     pdfPage,
     pdfScale,
     pdfMode,
@@ -687,6 +738,7 @@ function App() {
           </div>
           {activeFile?.kind === 'pdf' || activeFile?.kind === 'markdown' ? (
             <div className="pdf-tools">
+              {readingProgressLabel ? <span className="reading-progress-label">{readingProgressLabel}</span> : null}
               {activeFile.kind === 'pdf' ? (
                 <>
                   <button
@@ -700,14 +752,14 @@ function App() {
                     Prev
                   </button>
                   <span>
-                    {pdfPage}/{pdfDoc?.numPages ?? 0}
+                    {pdfPage}/{activePdfDoc?.numPages ?? 0}
                   </span>
                   <button
                     type="button"
                     className="btn-secondary"
                     disabled={pdfMode === 'continuous'}
                     title={pdfMode === 'continuous' ? 'Scroll the document in Book scroll mode' : 'Next page'}
-                    onClick={() => setPdfPage((prev) => Math.min(pdfDoc?.numPages ?? prev, prev + 1))}
+                    onClick={() => setPdfPage((prev) => Math.min(activePdfDoc?.numPages ?? prev, prev + 1))}
                   >
                     <Plus size={14} strokeWidth={1.75} />
                     Next
@@ -737,7 +789,15 @@ function App() {
           ) : null}
         </div>
 
-        <section className="viewer-surface" ref={viewerSurfaceRef}>
+        <section
+          className="viewer-surface"
+          ref={viewerSurfaceRef}
+          onScroll={() => {
+            if (activeFile?.kind === 'markdown') {
+              updateMarkdownProgress()
+            }
+          }}
+        >
           {activeFile?.kind === 'markdown' ? (
             <div className="markdown-view">
               <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
